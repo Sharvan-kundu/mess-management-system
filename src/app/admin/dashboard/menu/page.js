@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { api } from "@/lib/utils";
+import { api, todayDayName } from "@/lib/utils";
 import { DAYS, MEALS } from "@/lib/validators";
 import { MEAL_CONFIG } from "@/lib/meals";
 import { menuSaveSchema } from "@/lib/validators";
@@ -12,6 +12,7 @@ const emptyValues = () =>
 
 export default function MenuPage() {
   const [loading, setLoading] = useState(true);
+  const today = todayDayName();
   const { register, handleSubmit, reset, formState: { isSubmitting, isDirty } } = useForm({
     defaultValues: emptyValues(),
   });
@@ -70,8 +71,13 @@ export default function MenuPage() {
       ) : (
         <div className="space-y-4">
           {DAYS.map((day) => (
-            <div key={day} className="card">
-              <h2 className="mb-3 font-semibold">{day}</h2>
+            <div key={day} className={`card ${day === today ? "!border-brand-500 ring-2 ring-brand-100" : ""}`}>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-semibold">{day}</h2>
+                {day === today && (
+                  <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">Today</span>
+                )}
+              </div>
               <div className="grid gap-3 md:grid-cols-3">
                 {MEALS.map((meal) => (
                   <div key={meal}>

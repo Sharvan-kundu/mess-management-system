@@ -14,8 +14,14 @@ export default function LoginForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({ resolver: zodResolver(loginSchema) });
+
+  const handleQuickFill = (email, password) => {
+    setValue("email", email, { shouldValidate: true });
+    setValue("password", password, { shouldValidate: true });
+  };
 
   async function onSubmit(values) {
     setSubmitting(true);
@@ -42,11 +48,13 @@ export default function LoginForm() {
         <h1 className="text-xl font-semibold">Mess Management System</h1>
         <p className="mt-1 text-sm text-slate-500">Sign in with your college account</p>
       </div>
+
       <div>
         <label className="label" htmlFor="email">Email</label>
         <input id="email" type="email" autoComplete="email" className="input" {...register("email")} />
         {errors.email && <p className="field-error">{errors.email.message}</p>}
       </div>
+
       <div>
         <label className="label" htmlFor="password">Password</label>
         <div className="relative">
@@ -71,7 +79,7 @@ export default function LoginForm() {
               </svg>
             ) : (
               <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.2 12S5.8 6 12 6s9.8 6 9.8 6-3.6 6-9.8 6-9.8-6-9.8-6z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.2 12S5.8 6 12 6s9.8 6 9.8 6-3.6 6-9.8 6-9.8-6z" />
                 <circle cx="12" cy="12" r="2.5" />
               </svg>
             )}
@@ -79,9 +87,48 @@ export default function LoginForm() {
         </div>
         {errors.password && <p className="field-error">{errors.password.message}</p>}
       </div>
+
       <button type="submit" disabled={submitting} className="btn-primary w-full">
         {submitting ? "Signing in..." : "Sign in"}
       </button>
+
+      {/* Demo Credentials Helper Box */}
+      <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 space-y-2">
+        <p className="font-semibold text-slate-700">Demo Credentials:</p>
+        
+        <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
+          <div>
+            <span className="font-medium text-slate-800">Admin:</span>{" "}
+            <code className="text-slate-700 font-mono">b423052@iiit-bh.ac.in</code>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleQuickFill("b423052@iiit-bh.ac.in", "123456")}
+            className="ml-2 font-medium text-brand-600 hover:text-brand-700 hover:underline"
+          >
+            Auto-fill
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
+          <div>
+            <span className="font-medium text-slate-800">Student:</span>{" "}
+            <code className="text-slate-700 font-mono">diya@college.edu</code>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleQuickFill("diya@college.edu", "123456")}
+            className="ml-2 font-medium text-brand-600 hover:text-brand-700 hover:underline"
+          >
+            Auto-fill
+          </button>
+        </div>
+
+        <div className="pt-0.5">
+          <span className="font-medium text-slate-800">Password:</span>{" "}
+          <code className="text-slate-700 font-mono">123456</code>
+        </div>
+      </div>
     </form>
   );
 }
