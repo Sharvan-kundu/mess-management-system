@@ -18,7 +18,12 @@ export const authOptions = {
       async authorize(credentials) {
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
-        await connectDB();
+        try {
+          await connectDB();
+        } catch (err) {
+          console.error("Database connection failed during login:", err.message);
+          throw new Error("DatabaseConnectionError");
+        }
         const email = parsed.data.email.trim().toLowerCase();
         const user = await User.findOne({ email }).select("+password");
         if (!user) return null;

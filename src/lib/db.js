@@ -20,7 +20,7 @@ export async function connectDB() {
   if (!cached.promise) {
     cached.uri = uri;
     cached.promise = mongoose
-      .connect(uri, { bufferCommands: false })
+      .connect(uri, { bufferCommands: false, serverSelectionTimeoutMS: 5000 })
       .then((m) => m)
       .catch((error) => {
         cached.promise = null;

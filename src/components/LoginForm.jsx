@@ -29,7 +29,11 @@ export default function LoginForm() {
       const email = values.email ? values.email.trim().toLowerCase() : "";
       const res = await signIn("credentials", { ...values, email, redirect: false });
       if (res?.error) {
-        toast.error("Invalid email or password");
+        if (res.error.includes("DatabaseConnectionError")) {
+          toast.error("Database connection failed. Please check MongoDB Atlas IP access.");
+        } else {
+          toast.error("Invalid email or password");
+        }
         return;
       }
       const session = await getSession();
