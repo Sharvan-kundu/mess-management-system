@@ -19,9 +19,8 @@ export const authOptions = {
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
         await connectDB();
-        const user = await User.findOne({
-          email: parsed.data.email,
-        }).select("+password");
+        const email = parsed.data.email.trim().toLowerCase();
+        const user = await User.findOne({ email }).select("+password");
         if (!user) return null;
         const ok = await bcrypt.compare(parsed.data.password, user.password);
         if (!ok) return null;

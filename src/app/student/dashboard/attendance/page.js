@@ -54,64 +54,140 @@ export default function StudentAttendancePage() {
 
   const chip = (status) =>
     status === "Present"
-      ? "bg-green-100 text-green-700"
+      ? "bg-emerald-100 text-emerald-800 border-emerald-200"
       : status === "Absent"
-      ? "bg-red-100 text-red-600"
+      ? "bg-rose-100 text-rose-700 border-rose-200"
       : status === "Closed"
-      ? "bg-amber-100 text-amber-800"
-      : "bg-slate-100 text-slate-300";
+      ? "bg-amber-100 text-amber-800 border-amber-200"
+      : "bg-stone-100 text-stone-300 border-stone-200";
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="space-y-6">
+      {/* Header & Month Selector */}
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-200 pb-4">
         <div>
-          <h1 className="text-2xl font-semibold">My Attendance</h1>
-          <div className="flex flex-wrap gap-3 text-xs text-slate-500">
-            {MEALS.map((meal) => <span key={meal}>{MEAL_CONFIG[meal].shortLabel} = {MEAL_CONFIG[meal].label} ({MEAL_CONFIG[meal].time})</span>)}
-            <span>Amber = Closed</span>
-          </div>
+          <h1 className="text-xl font-bold tracking-tight text-stone-900">Attendance Log</h1>
+          <p className="text-xs text-stone-500 mt-0.5">
+            Your recorded presence across all meal windows.
+          </p>
         </div>
-        <select value={month} onChange={(e) => setMonth(e.target.value)} className="input !w-auto">
-          {months.map((m, i) => (
-            <option key={m} value={m}>{monthLabel(m)} {i === 0 ? "(current)" : "(previous)"}</option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <label htmlFor="month-select" className="text-xs font-semibold uppercase tracking-wider text-stone-500">
+            Month:
+          </label>
+          <select
+            id="month-select"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            className="input !w-auto text-xs py-1.5 font-medium"
+          >
+            {months.map((m, i) => (
+              <option key={m} value={m}>
+                {monthLabel(m)} {i === 0 ? "(Current)" : "(Previous)"}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {!data ? (
-        <p className="text-slate-400">Loading...</p>
+        <div className="card p-8 text-center text-sm text-stone-400">Loading attendance data...</div>
       ) : (
         <>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {MEALS.map((meal) => (
-              <div key={meal} className="card !p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{MEAL_CONFIG[meal].label}</p>
-                <p className="mt-1 text-sm">
-                  <span className="text-xl font-semibold text-green-700">{totals[meal].present}</span> present ·{" "}
-                  <span className="text-xl font-semibold text-red-600">{totals[meal].absent}</span> absent
-                </p>
-              </div>
-            ))}
+          {/* Summary Metric Cards */}
+          <div className="grid gap-3.5 sm:grid-cols-3">
+            {MEALS.map((meal) => {
+              const present = totals[meal]?.present || 0;
+              const absent = totals[meal]?.absent || 0;
+              const total = present + absent;
+              const pct = total > 0 ? Math.round((present / total) * 100) : 0;
+              return (
+                <div key={meal} className="card !p-4 flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">
+                      {MEAL_CONFIG[meal].label}
+                    </p>
+                    <span className="font-mono text-xs text-stone-400">{pct}% rate</span>
+                  </div>
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="text-2xl font-bold tracking-tight text-emerald-700 font-mono">
+                      {present}
+                    </span>
+                    <span className="text-xs text-stone-500 font-medium">present</span>
+                    <span className="text-stone-300">/</span>
+                    <span className="text-base font-semibold text-rose-600 font-mono">
+                      {absent}
+                    </span>
+                    <span className="text-xs text-stone-500 font-medium">absent</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
+          {/* Calendar Grid Card */}
           <div className="card">
-            <div className="mb-2 grid grid-cols-7 gap-1.5 text-center text-xs font-medium text-slate-400">
-              {WEEKDAYS.map((w) => <div key={w}>{w}</div>)}
+            {/* Legend */}
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3 text-xs text-stone-500">
+              <div className="flex flex-wrap items-center gap-3">
+                {MEALS.map((meal) => (
+                  <span key={meal} className="font-medium">
+                    <strong className="text-stone-700">{MEAL_CONFIG[meal].shortLabel}</strong>: {MEAL_CONFIG[meal].label} ({MEAL_CONFIG[meal].time})
+                  </span>
+                ))}
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" /> Present
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-rose-500" /> Absent
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-amber-500" /> Closed
+                </span>
+              </div>
             </div>
+
+            {/* Weekday Header */}
+            <div className="mb-2 grid grid-cols-7 gap-1.5 text-center text-[11px] font-bold uppercase tracking-wider text-stone-400">
+              {WEEKDAYS.map((w) => (
+                <div key={w} className="py-1">
+                  {w}
+                </div>
+              ))}
+            </div>
+
+            {/* Days Grid */}
             <div className="grid grid-cols-7 gap-1.5">
               {cells.map((c, i) =>
                 c ? (
-                  <div key={c.date} className={`rounded-lg border p-1.5 ${c.date === todayStr() ? "border-brand-500" : "border-slate-200"}`}>
-                    <div className="mb-1 flex items-center justify-between text-xs text-slate-500">
-                      <span>{c.d}</span>
-                      {c.closedReason && <span className="font-medium text-amber-700" title={c.closedReason}>Closed</span>}
+                  <div
+                    key={c.date}
+                    className={`rounded-lg border p-1.5 transition ${
+                      c.date === todayStr()
+                        ? "border-brand-500 ring-1 ring-brand-500/30 bg-brand-50/20"
+                        : "border-stone-200/90 bg-white"
+                    }`}
+                  >
+                    <div className="mb-1.5 flex items-center justify-between text-xs font-mono">
+                      <span className={`font-semibold ${c.date === todayStr() ? "text-brand-700" : "text-stone-700"}`}>
+                        {c.d}
+                      </span>
+                      {c.closedReason && (
+                        <span className="text-[10px] font-medium text-amber-700 uppercase tracking-tight" title={c.closedReason}>
+                          Closed
+                        </span>
+                      )}
                     </div>
-                    <div className="flex justify-between gap-0.5">
+                    <div className="flex justify-between gap-1">
                       {MEALS.map((meal) => (
                         <span
                           key={meal}
-                          title={`${MEAL_CONFIG[meal].label}: ${c.meals[meal] || "—"}`}
-                          className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-semibold ${chip(c.meals[meal])}`}
+                          title={`${MEAL_CONFIG[meal].label}: ${c.meals[meal] || "Upcoming"}`}
+                          className={`flex h-5 w-full items-center justify-center rounded border text-[10px] font-bold ${chip(
+                            c.meals[meal]
+                          )}`}
                         >
                           {c.meals[meal] === "Closed" ? "C" : MEAL_CONFIG[meal].shortLabel}
                         </span>
@@ -119,7 +195,7 @@ export default function StudentAttendancePage() {
                     </div>
                   </div>
                 ) : (
-                  <div key={`e${i}`} />
+                  <div key={`empty-${i}`} className="rounded-lg bg-stone-50/50 p-1.5" />
                 )
               )}
             </div>

@@ -53,69 +53,114 @@ export default function ReportsPage() {
     a.download = `mess-attendance-${month}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Report exported");
+    toast.success("Report CSV downloaded");
   }
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="space-y-6">
+      {/* Header and Export Action */}
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-200 pb-4">
         <div>
-          <h1 className="text-2xl font-semibold">Monthly Reports</h1>
-          <p className="text-sm text-slate-500">
-            Absent = open days elapsed ({data.elapsedDays}) minus days marked present.
+          <h1 className="text-xl font-bold tracking-tight text-stone-900">Attendance Reports</h1>
+          <p className="text-xs text-stone-500 mt-0.5">
+            Aggregated monthly meal attendance. Absent count is computed from elapsed open days ({data.elapsedDays}).
           </p>
         </div>
-        <button className="btn-primary" onClick={exportCsv} disabled={loading || data.rows.length === 0}>
-          Export CSV
+        <button
+          className="btn-primary text-xs py-2"
+          onClick={exportCsv}
+          disabled={loading || data.rows.length === 0}
+        >
+          Export CSV Spreadsheet
         </button>
       </div>
 
-      <div className="card flex flex-wrap gap-3">
-        <select value={month} onChange={(e) => setMonth(e.target.value)} className="input !w-auto">
-          {months.map((m, i) => (
-            <option key={m} value={m}>
-              {monthLabel(m)} {i === 0 ? "(current)" : "(previous)"}
-            </option>
-          ))}
-        </select>
+      {/* Filter Bar */}
+      <div className="card flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          <label htmlFor="report-month" className="text-xs font-semibold uppercase tracking-wider text-stone-500 shrink-0">
+            Month:
+          </label>
+          <select
+            id="report-month"
+            value={month}
+            onChange={(e) => setMonth(e.target.value)}
+            className="input !w-auto text-xs py-1.5 font-medium"
+          >
+            {months.map((m, i) => (
+              <option key={m} value={m}>
+                {monthLabel(m)} {i === 0 ? "(Current)" : "(Previous)"}
+              </option>
+            ))}
+          </select>
+        </div>
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by name or roll number..."
-          className="input flex-1"
+          placeholder="Filter report by student name or roll number..."
+          className="input flex-1 text-xs py-1.5"
         />
       </div>
 
+      {/* Report Table Card */}
       <div className="card overflow-x-auto !p-0">
         <table className="w-full">
-          <thead className="border-b border-slate-200 bg-slate-50">
+          <thead className="border-b border-stone-200 bg-stone-50/70">
             <tr>
-              <th className="th" rowSpan={2}>Roll No.</th>
-              <th className="th" rowSpan={2}>Name</th>
+              <th className="th border-r border-stone-200" rowSpan={2}>
+                Roll No.
+              </th>
+              <th className="th border-r border-stone-200" rowSpan={2}>
+                Student Name
+              </th>
               {MEALS.map((m) => (
-                <th key={m} className="th text-center" colSpan={2}>{MEAL_CONFIG[m].label}</th>
+                <th key={m} className="th text-center border-r border-stone-200 last:border-r-0" colSpan={2}>
+                  {MEAL_CONFIG[m].label}
+                </th>
               ))}
             </tr>
-            <tr>
+            <tr className="border-t border-stone-200/60">
               {MEALS.flatMap((m) => [
-                <th key={`${m}p`} className="th text-center !pt-0 text-green-700">P</th>,
-                <th key={`${m}a`} className="th text-center !pt-0 text-red-600">A</th>,
+                <th key={`${m}p`} className="th text-center !py-1 text-emerald-800 font-mono text-[10px]">
+                  P
+                </th>,
+                <th key={`${m}a`} className="th text-center !py-1 text-rose-700 font-mono text-[10px] border-r border-stone-200 last:border-r-0">
+                  A
+                </th>,
               ])}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {loading && <tr><td colSpan={8} className="td text-center text-slate-400">Loading...</td></tr>}
+          <tbody className="divide-y divide-stone-100">
+            {loading && (
+              <tr>
+                <td colSpan={8} className="td text-center text-stone-400 py-8">
+                  Generating report records...
+                </td>
+              </tr>
+            )}
             {!loading && data.rows.length === 0 && (
-              <tr><td colSpan={8} className="td text-center text-slate-400">No students found</td></tr>
+              <tr>
+                <td colSpan={8} className="td text-center text-stone-400 py-8">
+                  No student records found for this period.
+                </td>
+              </tr>
             )}
             {!loading &&
               data.rows.map((r) => (
-                <tr key={r._id}>
-                  <td className="td font-mono">{r.rollNumber}</td>
-                  <td className="td font-medium">{r.name}</td>
+                <tr key={r._id} className="hover:bg-stone-50/50 transition-colors">
+                  <td className="td font-mono text-xs font-semibold text-stone-700 border-r border-stone-100">
+                    {r.rollNumber}
+                  </td>
+                  <td className="td font-medium text-stone-900 border-r border-stone-100">
+                    {r.name}
+                  </td>
                   {MEALS.flatMap((m) => [
-                    <td key={`${m}p`} className="td text-center text-green-700">{r[m].present}</td>,
-                    <td key={`${m}a`} className="td text-center text-red-600">{r[m].absent}</td>,
+                    <td key={`${m}p`} className="td text-center font-mono font-semibold text-xs text-emerald-700">
+                      {r[m].present}
+                    </td>,
+                    <td key={`${m}a`} className="td text-center font-mono text-xs text-stone-500 border-r border-stone-100 last:border-r-0">
+                      {r[m].absent}
+                    </td>,
                   ])}
                 </tr>
               ))}

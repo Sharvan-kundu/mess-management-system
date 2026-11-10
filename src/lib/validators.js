@@ -13,7 +13,7 @@ export const DAYS = [
 export { MEALS } from "@/lib/meals";
 
 export const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Enter a valid email"),
+  email: z.string().trim().toLowerCase().min(1, "Email is required").email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
 });
 

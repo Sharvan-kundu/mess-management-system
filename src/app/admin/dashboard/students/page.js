@@ -49,25 +49,28 @@ function StudentForm({ student, onDone, onCancel }) {
   );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3" noValidate>
-      {Field({ name: "name", label: "Full name" })}
-      {Field({ name: "rollNumber", label: "Roll number" })}
-      {Field({ name: "email", label: "Email", type: "email" })}
-      {Field({ name: "phone", label: "Phone" })}
-      {Field({ name: "room", label: "Room" })}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5" noValidate>
+      {Field({ name: "name", label: "Full Name", placeholder: "e.g. Rahul Sharma" })}
+      {Field({ name: "rollNumber", label: "Roll Number", placeholder: "e.g. B12345" })}
+      {Field({ name: "email", label: "College Email", type: "email", placeholder: "e.g. rahul@college.edu" })}
+      {Field({ name: "phone", label: "Phone Number", placeholder: "e.g. 9876543210" })}
+      {Field({ name: "room", label: "Hostel Room Allotment", placeholder: "e.g. B-204" })}
       {Field({
         name: "password",
-        label: editing ? "New password (leave blank to keep)" : "Password",
+        label: editing ? "New Password (leave blank to retain current)" : "Initial Password",
         type: "password",
+        placeholder: "At least 6 characters",
       })}
-      <label className="flex items-center gap-2 text-sm text-slate-700">
-        <input type="checkbox" className="h-4 w-4 rounded border-slate-300" {...register("isActive")} />
-        Active (included in attendance and reports)
+      <label className="flex items-center gap-2 pt-1 text-xs font-medium text-stone-700 cursor-pointer">
+        <input type="checkbox" className="h-4 w-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500" {...register("isActive")} />
+        Active enrollment (included in attendance & reports)
       </label>
-      <div className="flex justify-end gap-2 pt-2">
-        <button type="button" onClick={onCancel} className="btn-secondary">Cancel</button>
-        <button type="submit" disabled={isSubmitting} className="btn-primary">
-          {isSubmitting ? "Saving..." : editing ? "Save changes" : "Register"}
+      <div className="flex justify-end gap-2 pt-3 border-t border-stone-100">
+        <button type="button" onClick={onCancel} className="btn-secondary text-xs">
+          Cancel
+        </button>
+        <button type="submit" disabled={isSubmitting} className="btn-primary text-xs">
+          {isSubmitting ? "Saving..." : editing ? "Save Changes" : "Register Student"}
         </button>
       </div>
     </form>
@@ -106,7 +109,7 @@ export default function StudentsPage() {
   useEffect(() => setPage(1), [debounced]);
 
   async function remove(s) {
-    if (!confirm(`Remove ${s.name} (${s.rollNumber})? Their attendance records will be deleted too.`)) return;
+    if (!confirm(`Remove ${s.name} (${s.rollNumber})? Their attendance records will also be permanently deleted.`)) return;
     try {
       await api(`/api/students/${s._id}`, { method: "DELETE" });
       toast.success(`${s.name} removed`);
@@ -119,30 +122,35 @@ export default function StudentsPage() {
   const close = () => setModal({ open: false, student: null });
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="space-y-6">
+      {/* Header and Add Button */}
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-200 pb-4">
         <div>
-          <h1 className="text-2xl font-semibold">Students</h1>
-          <p className="text-sm text-slate-500">Register, edit or remove students. {totalStudents} total.</p>
+          <h1 className="text-xl font-bold tracking-tight text-stone-900">Student Directory</h1>
+          <p className="text-xs text-stone-500 mt-0.5">
+            Register, edit details, or manage student mess accounts. {totalStudents} total students.
+          </p>
         </div>
-        <button className="btn-primary" onClick={() => setModal({ open: true, student: null })}>
-          + Add student
+        <button className="btn-primary text-xs py-2" onClick={() => setModal({ open: true, student: null })}>
+          + Register Student
         </button>
       </div>
 
+      {/* Search Input */}
       <input
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
           setPage(1);
         }}
-        placeholder="Search by name or roll number..."
-        className="input"
+        placeholder="Search student by name, roll number, or room..."
+        className="input text-xs py-2"
       />
 
+      {/* Directory Table */}
       <div className="card overflow-x-auto !p-0">
         <table className="w-full">
-          <thead className="border-b border-slate-200 bg-slate-50">
+          <thead className="border-b border-stone-200 bg-stone-50/70">
             <tr>
               <th className="th">Roll No.</th>
               <th className="th">Name</th>
@@ -153,29 +161,56 @@ export default function StudentsPage() {
               <th className="th text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {loading && <tr><td colSpan={7} className="td text-center text-slate-400">Loading...</td></tr>}
+          <tbody className="divide-y divide-stone-100">
+            {loading && (
+              <tr>
+                <td colSpan={7} className="td text-center text-stone-400 py-8">
+                  Loading directory...
+                </td>
+              </tr>
+            )}
             {!loading && students.length === 0 && (
-              <tr><td colSpan={7} className="td text-center text-slate-400">No students found</td></tr>
+              <tr>
+                <td colSpan={7} className="td text-center text-stone-400 py-8">
+                  No students found matching your search.
+                </td>
+              </tr>
             )}
             {!loading &&
               students.map((s) => (
-                <tr key={s._id}>
-                  <td className="td font-mono">{s.rollNumber}</td>
-                  <td className="td font-medium">{s.name}</td>
-                  <td className="td text-slate-500">{s.email}</td>
-                  <td className="td text-slate-500">{s.phone || "—"}</td>
-                  <td className="td text-slate-500">{s.room || "—"}</td>
+                <tr key={s._id} className="hover:bg-stone-50/50 transition-colors">
+                  <td className="td font-mono text-xs font-semibold text-stone-700">{s.rollNumber}</td>
+                  <td className="td font-medium text-stone-900">{s.name}</td>
+                  <td className="td font-mono text-xs text-stone-500">{s.email}</td>
+                  <td className="td font-mono text-xs text-stone-500">{s.phone || "—"}</td>
+                  <td className="td font-mono text-xs text-stone-500">{s.room || "—"}</td>
                   <td className="td">
-                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${s.isActive === false ? "bg-slate-100 text-slate-500" : "bg-green-100 text-green-700"}`}>
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
+                        s.isActive === false
+                          ? "bg-stone-100 text-stone-500 border-stone-200"
+                          : "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          s.isActive === false ? "bg-stone-400" : "bg-emerald-500"
+                        }`}
+                      />
                       {s.isActive === false ? "Inactive" : "Active"}
                     </span>
                   </td>
                   <td className="td space-x-3 text-right">
-                    <button className="text-sm font-medium text-brand-600 hover:underline" onClick={() => setModal({ open: true, student: s })}>
+                    <button
+                      className="text-xs font-semibold text-brand-700 hover:text-brand-900 hover:underline"
+                      onClick={() => setModal({ open: true, student: s })}
+                    >
                       Edit
                     </button>
-                    <button className="text-sm font-medium text-red-600 hover:underline" onClick={() => remove(s)}>
+                    <button
+                      className="text-xs font-semibold text-rose-600 hover:text-rose-800 hover:underline"
+                      onClick={() => remove(s)}
+                    >
                       Delete
                     </button>
                   </td>
@@ -185,15 +220,30 @@ export default function StudentsPage() {
         </table>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-500">Page {page} of {totalPages}</p>
+      {/* Pagination Footer */}
+      <div className="flex items-center justify-between border-t border-stone-200 pt-3">
+        <p className="text-xs text-stone-500 font-mono">
+          Page {page} of {totalPages}
+        </p>
         <div className="flex gap-2">
-          <button className="btn-secondary" disabled={page <= 1 || loading} onClick={() => setPage((value) => value - 1)}>Previous</button>
-          <button className="btn-secondary" disabled={page >= totalPages || loading} onClick={() => setPage((value) => value + 1)}>Next</button>
+          <button
+            className="btn-secondary text-xs py-1.5"
+            disabled={page <= 1 || loading}
+            onClick={() => setPage((value) => value - 1)}
+          >
+            Previous
+          </button>
+          <button
+            className="btn-secondary text-xs py-1.5"
+            disabled={page >= totalPages || loading}
+            onClick={() => setPage((value) => value + 1)}
+          >
+            Next
+          </button>
         </div>
       </div>
 
-      <Modal open={modal.open} onClose={close} title={modal.student ? "Edit student" : "Register student"}>
+      <Modal open={modal.open} onClose={close} title={modal.student ? "Edit Student Details" : "Register New Student"}>
         <StudentForm
           key={modal.student?._id || "new"}
           student={modal.student}

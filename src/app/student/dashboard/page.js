@@ -23,53 +23,91 @@ export default function StudentMenuPage() {
     api("/api/notices").then(({ notices }) => setNotice(notices[0] || null)).catch((e) => toast.error(e.message));
   }, []);
 
-  const statusClass = {
-    Present: "bg-green-100 text-green-800",
-    Absent: "bg-red-100 text-red-700",
-    "Not yet": "bg-slate-100 text-slate-600",
-    Closed: "bg-amber-100 text-amber-800",
+  const renderStatusBadge = (status) => {
+    const config = {
+      Present: {
+        bg: "bg-emerald-50 text-emerald-800 border-emerald-200",
+        dot: "bg-emerald-500",
+      },
+      Absent: {
+        bg: "bg-rose-50 text-rose-700 border-rose-200",
+        dot: "bg-rose-500",
+      },
+      "Not yet": {
+        bg: "bg-stone-100 text-stone-600 border-stone-200",
+        dot: "bg-stone-400",
+      },
+      Closed: {
+        bg: "bg-amber-50 text-amber-800 border-amber-200",
+        dot: "bg-amber-500",
+      },
+    }[status] || {
+      bg: "bg-stone-100 text-stone-600 border-stone-200",
+      dot: "bg-stone-400",
+    };
+
+    return (
+      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${config.bg}`}>
+        <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`} />
+        {status}
+      </span>
+    );
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
+      {/* Pinned Notice */}
       {notice && (
-        <section className="card border-brand-100 bg-brand-50/50">
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Latest notice</p>
-          <h2 className="mt-1 font-semibold">{notice.title}</h2>
-          <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">{notice.message}</p>
-          <p className="mt-2 text-xs text-slate-400">{new Date(notice.createdAt).toLocaleDateString()}</p>
+        <section className="card border-l-4 border-l-brand-600 border-stone-200 bg-brand-50/30">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-brand-700">
+              Notice Board
+            </span>
+            <span className="text-xs text-stone-400 font-mono">
+              {new Date(notice.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+            </span>
+          </div>
+          <h2 className="mt-1.5 text-base font-semibold tracking-tight text-stone-900">{notice.title}</h2>
+          <p className="mt-1 whitespace-pre-wrap text-sm text-stone-600 leading-relaxed">{notice.message}</p>
         </section>
       )}
 
+      {/* Today's Meals Section */}
       <section className="space-y-3">
         <div>
-          <h1 className="text-2xl font-semibold">Today</h1>
-          <p className="text-sm text-slate-500">Today's meals, timings, menu and attendance.</p>
+          <h1 className="text-xl font-bold tracking-tight text-stone-900">Today's Meals</h1>
+          <p className="text-xs text-stone-500">Live meal schedule, menu items, and your attendance status.</p>
         </div>
+
         {!todayData ? (
-          <p className="text-slate-400">Loading today's meals...</p>
+          <div className="card p-6 text-center text-sm text-stone-400">Loading today's schedule...</div>
         ) : (
           <>
             {todayData.closed && (
-              <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
-                Mess closed today{todayData.holidayReason ? `: ${todayData.holidayReason}` : "."}
-              </p>
+              <div className="rounded-lg border border-amber-200 bg-amber-50/80 p-3.5 text-sm text-amber-900 font-medium">
+                Mess is closed today{todayData.holidayReason ? `: ${todayData.holidayReason}` : "."}
+              </div>
             )}
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-3.5 md:grid-cols-3">
               {todayData.meals.map((meal) => (
-                <article key={meal.key} className="card !p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h2 className="font-semibold">{meal.label}</h2>
-                      <p className="text-xs text-slate-500">{meal.time}</p>
+                <article key={meal.key} className="card flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-start justify-between gap-2 border-b border-stone-100 pb-2.5">
+                      <div>
+                        <h2 className="text-sm font-bold text-stone-900">{meal.label}</h2>
+                        <p className="text-xs font-mono text-stone-500">{meal.time}</p>
+                      </div>
+                      {renderStatusBadge(meal.status)}
                     </div>
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusClass[meal.status]}`}>
-                      {meal.status}
-                    </span>
+                    <div className="mt-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 mb-1">
+                        Menu
+                      </p>
+                      <p className="text-sm text-stone-700 leading-normal">
+                        {meal.items.length ? meal.items.join(" · ") : <span className="text-stone-400 italic">No menu published</span>}
+                      </p>
+                    </div>
                   </div>
-                  <p className="mt-3 text-sm text-slate-600">
-                    {meal.items.length ? meal.items.join(" · ") : "Menu not set"}
-                  </p>
                 </article>
               ))}
             </div>
@@ -77,42 +115,60 @@ export default function StudentMenuPage() {
         )}
       </section>
 
-      <div>
-        <h2 className="text-xl font-semibold">This Week's Menu</h2>
-        <p className="text-sm text-slate-500">Today's menu is highlighted.</p>
-      </div>
-
-      {!menu ? (
-        <p className="text-slate-400">Loading weekly menu...</p>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {DAYS.map((day) => (
-            <div key={day} className={`card ${day === today ? "!border-brand-500 ring-2 ring-brand-100" : ""}`}>
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-semibold">{day}</h2>
-                {day === today && (
-                  <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">Today</span>
-                )}
-              </div>
-              <dl className="space-y-3">
-                {MEALS.map((meal) => {
-                  const items = menu[day]?.[meal] || [];
-                  return (
-                    <div key={meal}>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                        {MEAL_CONFIG[meal].label} <span className="font-normal normal-case">{MEAL_CONFIG[meal].time}</span>
-                      </dt>
-                      <dd className="text-sm">
-                        {items.length ? items.join(" • ") : <span className="text-slate-400">Not set</span>}
-                      </dd>
-                    </div>
-                  );
-                })}
-              </dl>
-            </div>
-          ))}
+      {/* Weekly Menu Section */}
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight text-stone-900">Weekly Menu</h2>
+          <p className="text-xs text-stone-500">Scheduled menu for the recurring 7-day cycle.</p>
         </div>
-      )}
+
+        {!menu ? (
+          <div className="card p-6 text-center text-sm text-stone-400">Loading weekly menu...</div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {DAYS.map((day) => {
+              const isToday = day === today;
+              return (
+                <div
+                  key={day}
+                  className={`card transition ${
+                    isToday ? "!border-brand-500 ring-1 ring-brand-500/30 bg-white" : "border-stone-200"
+                  }`}
+                >
+                  <div className="mb-3.5 flex items-center justify-between border-b border-stone-100 pb-2.5">
+                    <h3 className="font-bold text-stone-900">{day}</h3>
+                    {isToday && (
+                      <span className="rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+                        Today
+                      </span>
+                    )}
+                  </div>
+                  <dl className="space-y-3">
+                    {MEALS.map((meal) => {
+                      const items = menu[day]?.[meal] || [];
+                      return (
+                        <div key={meal} className="text-sm">
+                          <dt className="text-[11px] font-semibold uppercase tracking-wider text-stone-400 flex items-center justify-between">
+                            <span>{MEAL_CONFIG[meal].label}</span>
+                            <span className="font-mono text-stone-400 font-normal">{MEAL_CONFIG[meal].time}</span>
+                          </dt>
+                          <dd className="mt-0.5 text-stone-700">
+                            {items.length ? (
+                              items.join(" · ")
+                            ) : (
+                              <span className="text-stone-400 italic text-xs">Not set</span>
+                            )}
+                          </dd>
+                        </div>
+                      );
+                    })}
+                  </dl>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

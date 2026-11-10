@@ -11,7 +11,7 @@ export default async function LoginPage() {
     redirect(session.user.role === "admin" ? "/admin/dashboard" : "/student/dashboard");
   }
   return (
-    <main className="flex min-h-screen items-center justify-center px-4">
+    <main className="flex min-h-screen items-center justify-center px-4 py-8 bg-[#fbfaf8]">
       <LoginForm />
     </main>
   );

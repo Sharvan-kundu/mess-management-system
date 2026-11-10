@@ -22,7 +22,7 @@ export default function ProfilePage() {
   async function onSubmit(values) {
     try {
       await api("/api/me/password", { method: "PUT", body: values });
-      toast.success("Password updated");
+      toast.success("Password updated successfully");
       reset();
     } catch (e) {
       toast.error(e.message);
@@ -30,50 +30,79 @@ export default function ProfilePage() {
   }
 
   const Row = ({ label, value }) => (
-    <div className="flex justify-between border-b border-slate-100 py-2 last:border-0">
-      <dt className="text-sm text-slate-500">{label}</dt>
-      <dd className="text-sm font-medium">{value || "—"}</dd>
+    <div className="flex items-center justify-between border-b border-stone-100 py-2.5 last:border-0">
+      <dt className="text-xs font-semibold uppercase tracking-wider text-stone-500">{label}</dt>
+      <dd className="text-sm font-medium text-stone-900 font-mono">{value || "—"}</dd>
     </div>
   );
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-semibold">Profile & Settings</h1>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-xl font-bold tracking-tight text-stone-900">Profile & Security</h1>
+        <p className="text-xs text-stone-500 mt-0.5">
+          View registered hostel and dining information or update your password.
+        </p>
+      </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        <div className="card">
-          <h2 className="mb-2 font-semibold">Registered details</h2>
-          {user ? (
-            <dl>
-              {Row({ label: "Name", value: user.name })}
-              {Row({ label: "Roll number", value: user.rollNumber })}
-              {Row({ label: "Phone", value: user.phone })}
-              {Row({ label: "Room", value: user.room })}
-              {Row({ label: "Email", value: user.email })}
-              {Row({ label: "Role", value: user.role })}
-            </dl>
-          ) : (
-            <p className="text-slate-400">Loading...</p>
-          )}
-          <p className="mt-3 text-xs text-slate-400">To change these, contact the mess admin.</p>
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Student Details Card */}
+        <div className="card flex flex-col justify-between">
+          <div>
+            <div className="border-b border-stone-100 pb-3 mb-3">
+              <h2 className="text-sm font-bold text-stone-900">Student Information</h2>
+              <p className="text-xs text-stone-500">Official records registered with the mess office.</p>
+            </div>
+            {user ? (
+              <dl className="divide-y divide-stone-100">
+                {Row({ label: "Full Name", value: user.name })}
+                {Row({ label: "Roll Number", value: user.rollNumber })}
+                {Row({ label: "Phone", value: user.phone })}
+                {Row({ label: "Room Allotment", value: user.room })}
+                {Row({ label: "Email Address", value: user.email })}
+                {Row({ label: "System Role", value: user.role })}
+              </dl>
+            ) : (
+              <p className="text-stone-400 py-6 text-center text-sm">Loading profile...</p>
+            )}
+          </div>
+          <p className="mt-4 border-t border-stone-100 pt-3 text-[11px] text-stone-400">
+            Need to update registration details? Please visit the mess office administrator.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="card space-y-3" noValidate>
-          <h2 className="font-semibold">Change password</h2>
+        {/* Change Password Card */}
+        <form onSubmit={handleSubmit(onSubmit)} className="card space-y-4" noValidate>
+          <div className="border-b border-stone-100 pb-3">
+            <h2 className="text-sm font-bold text-stone-900">Change Password</h2>
+            <p className="text-xs text-stone-500">Choose a secure password with at least 6 characters.</p>
+          </div>
+
           {[
-            ["currentPassword", "Current password"],
-            ["newPassword", "New password"],
-            ["confirmPassword", "Confirm new password"],
+            ["currentPassword", "Current Password"],
+            ["newPassword", "New Password"],
+            ["confirmPassword", "Confirm New Password"],
           ].map(([name, label]) => (
             <div key={name}>
-              <label className="label" htmlFor={name}>{label}</label>
-              <input id={name} type="password" className="input" autoComplete="off" {...register(name)} />
+              <label className="label" htmlFor={name}>
+                {label}
+              </label>
+              <input
+                id={name}
+                type="password"
+                className="input"
+                autoComplete="off"
+                {...register(name)}
+              />
               {errors[name] && <p className="field-error">{errors[name].message}</p>}
             </div>
           ))}
-          <button type="submit" disabled={isSubmitting} className="btn-primary">
-            {isSubmitting ? "Updating..." : "Update password"}
-          </button>
+
+          <div className="pt-1">
+            <button type="submit" disabled={isSubmitting} className="btn-primary w-full sm:w-auto">
+              {isSubmitting ? "Updating..." : "Update Password"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

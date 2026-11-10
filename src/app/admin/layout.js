@@ -10,9 +10,9 @@ const links = [
 
 export default function AdminLayout({ children }) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#fbfaf8]">
       <Sidebar title="Admin" links={links} />
-      <main className="mx-auto max-w-5xl p-4 md:ml-60 md:p-8">{children}</main>
+      <main className="mx-auto max-w-5xl p-4 md:ml-64 md:p-8">{children}</main>
     </div>
   );
 }

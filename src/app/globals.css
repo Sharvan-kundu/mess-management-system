@@ -3,40 +3,44 @@
 @tailwind utilities;
 
 @layer base {
+  * {
+    border-color: rgb(231 229 228); /* stone-200 */
+  }
   body {
-    @apply bg-slate-50 text-slate-800 antialiased;
+    @apply bg-[#fbfaf8] text-stone-800 antialiased selection:bg-brand-100 selection:text-brand-900;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
 @layer components {
   .card {
-    @apply rounded-xl border border-slate-200 bg-white p-5 shadow-sm;
+    @apply rounded-xl border border-stone-200/90 bg-white p-5 shadow-card;
   }
   .input {
-    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+    @apply w-full rounded-lg border border-stone-300 bg-white px-3.5 py-2 text-sm text-stone-900 placeholder:text-stone-400 outline-none transition focus:border-brand-600 focus:ring-1 focus:ring-brand-600;
   }
   .label {
-    @apply mb-1 block text-sm font-medium text-slate-700;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-stone-600;
   }
   .field-error {
-    @apply mt-1 text-xs text-red-600;
+    @apply mt-1.5 text-xs font-medium text-rose-600;
   }
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold tracking-tight transition duration-150 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100;
   }
   .btn-primary {
-    @apply btn bg-brand-600 text-white hover:bg-brand-700;
+    @apply btn bg-brand-600 text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600;
   }
   .btn-secondary {
-    @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+    @apply btn border border-stone-300 bg-white text-stone-700 shadow-sm hover:bg-stone-50 hover:text-stone-900 hover:border-stone-400;
   }
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700;
+    @apply btn border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300;
   }
   .th {
-    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500;
+    @apply px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-stone-500;
   }
   .td {
-    @apply px-4 py-3 text-sm;
+    @apply px-4 py-3 text-sm text-stone-800;
   }
 }

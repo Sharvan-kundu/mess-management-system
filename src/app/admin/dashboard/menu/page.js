@@ -42,12 +42,12 @@ export default function MenuPage() {
     );
     const parsed = menuSaveSchema.safeParse({ menus });
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message || "Invalid menu");
+      toast.error(parsed.error.issues[0]?.message || "Invalid menu configuration");
       return;
     }
     try {
       await api("/api/menu", { method: "PUT", body: parsed.data });
-      toast.success("Menu saved");
+      toast.success("Weekly menu published successfully");
       reset(values);
     } catch (e) {
       toast.error(e.message);
@@ -55,47 +55,67 @@ export default function MenuPage() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Header and Save Action */}
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-stone-200 pb-4">
         <div>
-          <h1 className="text-2xl font-semibold">Weekly Menu</h1>
-          <p className="text-sm text-slate-500">One item per line. This menu repeats every week.</p>
+          <h1 className="text-xl font-bold tracking-tight text-stone-900">Weekly Menu Planner</h1>
+          <p className="text-xs text-stone-500 mt-0.5">
+            Set dishes served for each meal window. Enter one item per line or separated by commas.
+          </p>
         </div>
-        <button type="submit" disabled={isSubmitting || loading || !isDirty} className="btn-primary">
-          {isSubmitting ? "Saving..." : "Save menu"}
+        <button
+          type="submit"
+          disabled={isSubmitting || loading || !isDirty}
+          className="btn-primary text-xs py-2"
+        >
+          {isSubmitting ? "Saving..." : isDirty ? "Save Menu Changes *" : "Menu Up to Date"}
         </button>
       </div>
 
       {loading ? (
-        <p className="text-slate-400">Loading...</p>
+        <div className="card p-8 text-center text-sm text-stone-400">Loading published menu...</div>
       ) : (
         <div className="space-y-4">
-          {DAYS.map((day) => (
-            <div key={day} className={`card ${day === today ? "!border-brand-500 ring-2 ring-brand-100" : ""}`}>
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-semibold">{day}</h2>
-                {day === today && (
-                  <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">Today</span>
-                )}
+          {DAYS.map((day) => {
+            const isToday = day === today;
+            return (
+              <div
+                key={day}
+                className={`card transition ${
+                  isToday ? "!border-brand-500 ring-1 ring-brand-500/30 bg-white" : "border-stone-200"
+                }`}
+              >
+                <div className="mb-3.5 flex items-center justify-between border-b border-stone-100 pb-2.5">
+                  <h2 className="font-bold text-stone-900">{day}</h2>
+                  {isToday && (
+                    <span className="rounded-full bg-brand-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+                      Current Day
+                    </span>
+                  )}
+                </div>
+                <div className="grid gap-3.5 md:grid-cols-3">
+                  {MEALS.map((meal) => (
+                    <div key={meal}>
+                      <label className="label flex items-center justify-between" htmlFor={`${day}-${meal}`}>
+                        <span>{MEAL_CONFIG[meal].label}</span>
+                        <span className="font-mono text-stone-400 font-normal lowercase text-[10px]">
+                          {MEAL_CONFIG[meal].time}
+                        </span>
+                      </label>
+                      <textarea
+                        id={`${day}-${meal}`}
+                        rows={3}
+                        className="input resize-y font-mono text-xs"
+                        placeholder="e.g. Dal Makhani&#10;Steamed Rice&#10;Roti"
+                        {...register(`${day}.${meal}`)}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="grid gap-3 md:grid-cols-3">
-                {MEALS.map((meal) => (
-                  <div key={meal}>
-                    <label className="label" htmlFor={`${day}-${meal}`}>
-                      {MEAL_CONFIG[meal].label} <span className="font-normal text-slate-400">{MEAL_CONFIG[meal].time}</span>
-                    </label>
-                    <textarea
-                      id={`${day}-${meal}`}
-                      rows={4}
-                      className="input resize-y"
-                      placeholder="e.g. Poha&#10;Tea"
-                      {...register(`${day}.${meal}`)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </form>
